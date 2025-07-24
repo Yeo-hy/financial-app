@@ -20,10 +20,25 @@ opendart_api = OpenDartAPI(OPENDART_API_KEY)
 visualizer = FinancialVisualizer()
 ai_analyzer = AuditRiskAnalyzer()
 
+def init_database():
+    """데이터베이스를 초기화합니다."""
+    try:
+        from xml_to_db import create_database, parse_xml_and_insert
+        print("데이터베이스를 초기화하는 중...")
+        conn = create_database()
+        parse_xml_and_insert(conn)
+        conn.close()
+        print("데이터베이스 초기화 완료!")
+    except Exception as e:
+        print(f"데이터베이스 초기화 중 오류 발생: {e}")
+
 def get_db_connection():
     """데이터베이스 연결을 반환합니다."""
     if not os.path.exists('companies.db'):
-        return None
+        print("데이터베이스가 없습니다. 초기화를 시도합니다...")
+        init_database()
+        if not os.path.exists('companies.db'):
+            return None
     conn = sqlite3.connect('companies.db')
     conn.row_factory = sqlite3.Row
     return conn
