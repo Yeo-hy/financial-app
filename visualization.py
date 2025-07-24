@@ -7,31 +7,48 @@ import os
 import urllib.request
 from typing import Dict, List, Tuple
 
+# 전역 폰트 설정
+KOREAN_FONT = None
+
 def setup_korean_font():
     """한글 폰트를 설정합니다."""
+    global KOREAN_FONT
+    
     try:
         # matplotlib 기본 설정
         plt.rcParams['axes.unicode_minus'] = False
         
-        # 한글 폰트 다운로드 및 설정
+        # 1. 폰트 다운로드 시도
         font_path = download_korean_font()
         if font_path and os.path.exists(font_path):
-            # 다운로드된 폰트 등록
-            fm.fontManager.addfont(font_path)
-            font_prop = fm.FontProperties(fname=font_path)
-            plt.rcParams['font.family'] = [font_prop.get_name()]
-            print(f"한글 폰트 설정 완료: {font_prop.get_name()}")
-        else:
-            # 시스템 폰트 사용
-            setup_system_korean_font()
+            try:
+                # 다운로드된 폰트 등록
+                fm.fontManager.addfont(font_path)
+                KOREAN_FONT = fm.FontProperties(fname=font_path)
+                plt.rcParams['font.family'] = [KOREAN_FONT.get_name()]
+                print(f"다운로드 폰트 설정 완료: {KOREAN_FONT.get_name()}")
+                return KOREAN_FONT
+            except Exception as e:
+                print(f"다운로드 폰트 등록 실패: {e}")
         
-        print(f"최종 폰트 설정: {plt.rcParams['font.family']}")
+        # 2. 시스템 폰트 찾기
+        korean_font = find_system_korean_font()
+        if korean_font:
+            KOREAN_FONT = korean_font
+            plt.rcParams['font.family'] = [korean_font.get_name()]
+            print(f"시스템 폰트 설정 완료: {korean_font.get_name()}")
+            return korean_font
+        
+        # 3. 최후 수단: DejaVu Sans
+        print("한글 폰트를 찾을 수 없습니다. DejaVu Sans를 사용합니다.")
+        plt.rcParams['font.family'] = ['DejaVu Sans', 'Liberation Sans', 'Arial', 'sans-serif']
         
     except Exception as e:
         print(f"폰트 설정 중 오류: {e}")
-        # 최후 수단: DejaVu Sans 사용
         plt.rcParams['font.family'] = ['DejaVu Sans', 'sans-serif']
         plt.rcParams['axes.unicode_minus'] = False
+    
+    return None
 
 def download_korean_font():
     """Noto Sans CJK 폰트를 다운로드합니다."""
@@ -40,61 +57,76 @@ def download_korean_font():
         if not os.path.exists(font_dir):
             os.makedirs(font_dir)
         
-        font_path = os.path.join(font_dir, 'NotoSansCJK-Regular.ttc')
+        # 더 가벼운 서브셋 폰트 다운로드
+        font_path = os.path.join(font_dir, 'NotoSansKR-Regular.ttf')
         
         # 이미 다운로드된 경우 그대로 사용
         if os.path.exists(font_path):
             print("기존 한글 폰트 파일을 사용합니다.")
             return font_path
         
-        # Google Fonts에서 Noto Sans CJK 다운로드
-        font_url = 'https://github.com/googlefonts/noto-cjk/raw/main/Sans/OTF/Korean/NotoSansCJK-Regular.otf'
-        alt_font_path = os.path.join(font_dir, 'NotoSansCJK-Regular.otf')
+        # 더 안정적인 폰트 URL 사용
+        font_url = 'https://fonts.gstatic.com/s/notosanskr/v36/PbyxFmXiEBPT4ITbgNA5Cgms3VYcOA-vvnIzzuoyeLTq8H4hfeE.ttf'
         
         print("한글 폰트를 다운로드하는 중...")
-        urllib.request.urlretrieve(font_url, alt_font_path)
+        urllib.request.urlretrieve(font_url, font_path)
         print("한글 폰트 다운로드 완료!")
-        return alt_font_path
+        return font_path
         
     except Exception as e:
         print(f"폰트 다운로드 실패: {e}")
         return None
 
-def setup_system_korean_font():
-    """시스템에서 사용 가능한 한글 폰트를 설정합니다."""
-    # 시스템에서 사용 가능한 폰트 확인
-    available_fonts = [f.name for f in fm.fontManager.ttflist]
-    
-    # 한글 폰트 우선순위
-    korean_fonts = [
-        'Noto Sans CJK KR',
-        'Noto Sans KR', 
-        'NanumGothic',
-        'NanumBarunGothic',
-        'Malgun Gothic',
-        'Apple SD Gothic Neo',
-        'UnDotum',
-        'Gulim',
-        'Arial Unicode MS',
-        'DejaVu Sans'
-    ]
-    
-    # 사용 가능한 한글 폰트 찾기
-    selected_font = None
-    for font in korean_fonts:
-        if font in available_fonts:
-            selected_font = font
-            print(f"시스템 한글 폰트 설정: {font}")
-            break
-    
-    if selected_font:
-        plt.rcParams['font.family'] = [selected_font]
-    else:
-        print("한글 폰트를 찾을 수 없습니다. 기본 폰트를 사용합니다.")
-        plt.rcParams['font.family'] = ['DejaVu Sans', 'Liberation Sans', 'sans-serif']
+def find_system_korean_font():
+    """시스템에서 사용 가능한 한글 폰트를 찾습니다."""
+    try:
+        # 한글 폰트 우선순위
+        korean_fonts = [
+            'Noto Sans CJK KR',
+            'Noto Sans KR', 
+            'NanumGothic',
+            'NanumBarunGothic',
+            'Malgun Gothic',
+            'Apple SD Gothic Neo',
+            'UnDotum',
+            'Gulim',
+            'Arial Unicode MS'
+        ]
+        
+        # 시스템 폰트 파일 직접 확인
+        for font_name in korean_fonts:
+            try:
+                # 폰트 속성 생성 시도
+                font_prop = fm.FontProperties(family=font_name)
+                if font_prop.get_name() != 'DejaVu Sans':  # 기본 폰트가 아닌 경우
+                    print(f"시스템 한글 폰트 발견: {font_name}")
+                    return font_prop
+            except:
+                continue
+        
+        return None
+        
+    except Exception as e:
+        print(f"시스템 폰트 검색 실패: {e}")
+        return None
 
-# 한글 폰트 설정 실행
-setup_korean_font()
+def apply_korean_font_to_text(text_objects):
+    """텍스트 객체들에 한글 폰트를 적용합니다."""
+    if KOREAN_FONT is None:
+        return
+    
+    if not isinstance(text_objects, list):
+        text_objects = [text_objects]
+    
+    for text_obj in text_objects:
+        if text_obj is not None:
+            try:
+                if hasattr(text_obj, 'set_fontproperties'):
+                    text_obj.set_fontproperties(KOREAN_FONT)
+                elif hasattr(text_obj, 'set_fontfamily'):
+                    text_obj.set_fontfamily(KOREAN_FONT.get_name())
+            except:
+                pass
 
 class FinancialVisualizer:
     """재무데이터 시각화 클래스"""
@@ -142,7 +174,8 @@ class FinancialVisualizer:
         
         # 차트 생성 - 박스형 적층 막대 차트
         fig, ax = plt.subplots(1, 1, figsize=(12, 8))
-        fig.suptitle('재무상태표 구성', fontsize=16, fontweight='bold')
+        title = fig.suptitle('재무상태표 구성', fontsize=16, fontweight='bold')
+        apply_korean_font_to_text(title)
         
         # 데이터 준비
         categories = ['자산', '부채와 자본']
@@ -189,7 +222,8 @@ class FinancialVisualizer:
         # 축 설정
         ax.set_xticks(x_pos)
         ax.set_xticklabels(categories, fontsize=14, fontweight='bold')
-        ax.set_ylabel('금액 (조원)', fontsize=12, fontweight='bold')
+        ylabel = ax.set_ylabel('금액 (조원)', fontsize=12, fontweight='bold')
+        apply_korean_font_to_text([ylabel] + ax.get_xticklabels())
         ax.grid(axis='y', alpha=0.3)
         
         # 각 구간별 값 표시 (계정명 + 금액 + 퍼센트)
@@ -569,9 +603,12 @@ class FinancialVisualizer:
         """데이터가 없을 때 표시할 차트를 생성합니다."""
         fig, ax = plt.subplots(figsize=(10, 6))
         ax.text(0.5, 0.5, message, transform=ax.transAxes, 
-               ha='center', va='center', fontsize=16, 
-               bbox=dict(boxstyle="round,pad=0.3", facecolor=self.colors['light']))
+                ha='center', va='center', fontsize=16, 
+                bbox=dict(boxstyle="round,pad=0.3", facecolor=self.colors['light']))
         ax.set_xlim(0, 1)
         ax.set_ylim(0, 1)
         ax.axis('off')
-        return self._save_chart_as_base64(fig) 
+        return self._save_chart_as_base64(fig)
+
+# 한글 폰트 설정 실행
+setup_korean_font() 
