@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 재무분석 & 감사 리스크 분석 플랫폼</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-top: 50px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .feature-highlights {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .feature-tag {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.3s ease;
+        }
+
+        .feature-tag:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .search-section {
+            padding: 40px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 50px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .search-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .loading {
+            text-align: center;
+            color: #667eea;
+            font-size: 18px;
+            margin: 20px 0;
+        }
+
+        .message {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .message.info {
+            background: #e3f2fd;
+            color: #1976d2;
+            border: 1px solid #bbdefb;
+        }
+
+        .message.error {
+            background: #ffebee;
+            color: #d32f2f;
+            border: 1px solid #ffcdd2;
+        }
+
+        .results {
+            margin-top: 30px;
+        }
+
+        .result-item {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .result-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-color: #667eea;
+        }
+
+        .corp-name {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .corp-code {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .corp-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+        }
+
+                 .detail-label {
+             font-weight: 600;
+             color: #333;
+         }
+
+         .action-buttons {
+             display: flex;
+             gap: 10px;
+             margin-top: 15px;
+             padding-top: 15px;
+             border-top: 1px solid #e9ecef;
+         }
+
+         .financial-btn {
+             padding: 8px 15px;
+             border: none;
+             border-radius: 8px;
+             cursor: pointer;
+             font-size: 0.9em;
+             font-weight: 600;
+             transition: all 0.3s ease;
+             background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+             color: white;
+         }
+
+         .financial-btn:hover {
+             transform: translateY(-1px);
+             box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+         }
+
+        @media (max-width: 600px) {
+            .search-box {
+                flex-direction: column;
+            }
+            
+            .search-btn {
+                width: 100%;
+            }
+            
+            .corp-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+                    <h1>🚀 AI 재무분석 & 감사 리스크 분석 플랫폼</h1>
+        <p>회사명을 검색하여 종합적인 재무분석과 AI 기반 감사 리스크 분석을 받아보세요</p>
+        <div class="feature-highlights">
+            <span class="feature-tag">📊 재무비율 분석</span>
+            <span class="feature-tag">📈 시각화 차트</span>
+            <span class="feature-tag">🤖 AI 감사 리스크 분석</span>
+            <span class="feature-tag">⚡ 실시간 분석</span>
+        </div>
+        </div>
+        
+        <div class="search-section">
+            <div class="search-box">
+                <input type="text" id="searchInput" class="search-input" 
+                       placeholder="회사명을 입력하세요 (예: 삼성, 현대, LG...)" 
+                       autocomplete="off">
+                <button id="searchBtn" class="search-btn">검색</button>
+            </div>
+            
+            <div id="loading" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p style="margin-top: 10px;">검색 중...</p>
+            </div>
+            
+            <div id="message" class="message" style="display: none;"></div>
+            
+            <div id="results" class="results"></div>
+        </div>
+    </div>
+
+    <script>
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const loading = document.getElementById('loading');
+        const message = document.getElementById('message');
+        const results = document.getElementById('results');
+
+        // Enter 키로 검색 실행
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                search();
+            }
+        });
+
+        // 검색 버튼 클릭
+        searchBtn.addEventListener('click', search);
+
+        async function search() {
+            const query = searchInput.value.trim();
+            
+            if (!query) {
+                showMessage('검색어를 입력해주세요.', 'error');
+                return;
+            }
+
+            // UI 상태 변경
+            loading.style.display = 'block';
+            message.style.display = 'none';
+            results.innerHTML = '';
+            searchBtn.disabled = true;
+
+            try {
+                const response = await fetch(`/search?q=${encodeURIComponent(query)}`);
+                const data = await response.json();
+
+                loading.style.display = 'none';
+                searchBtn.disabled = false;
+
+                if (data.results && data.results.length > 0) {
+                    displayResults(data.results);
+                    showMessage(data.message, 'info');
+                } else {
+                    showMessage(data.message || '검색 결과가 없습니다.', 'error');
+                }
+            } catch (error) {
+                loading.style.display = 'none';
+                searchBtn.disabled = false;
+                showMessage('검색 중 오류가 발생했습니다.', 'error');
+                console.error('Search error:', error);
+            }
+        }
+
+        function displayResults(data) {
+            results.innerHTML = '';
+            
+            data.forEach(company => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                
+                resultItem.innerHTML = `
+                    <div class="corp-name">${company.corp_name}</div>
+                    <div class="corp-code">기업코드: ${company.corp_code}</div>
+                    <div class="corp-details">
+                        <div class="detail-item">
+                            <span class="detail-label">영문명:</span>
+                            <span>${company.corp_eng_name || 'N/A'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">주식코드:</span>
+                            <span>${company.stock_code || 'N/A'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">수정일:</span>
+                            <span>${formatDate(company.modify_date)}</span>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="financial-btn" onclick="openFinancialPage('${company.corp_code}', event)" style="width: 100%;">
+                            📊 재무분석
+                        </button>
+                    </div>
+                `;
+                
+                // 기본 클릭 이벤트는 제거 (버튼으로 대체)
+                
+                results.appendChild(resultItem);
+            });
+        }
+
+        function showMessage(text, type) {
+            message.textContent = text;
+            message.className = `message ${type}`;
+            message.style.display = 'block';
+            
+            // 3초 후 메시지 자동 숨김
+            setTimeout(() => {
+                message.style.display = 'none';
+            }, 3000);
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr || dateStr.length !== 8) return dateStr;
+            return `${dateStr.substr(0,4)}-${dateStr.substr(4,2)}-${dateStr.substr(6,2)}`;
+        }
+
+        // 재무분석 페이지로 이동
+        function openFinancialPage(corpCode, event) {
+            event.stopPropagation();
+            window.open(`/financial-page/${corpCode}`, '_blank');
+        }
+
+        // 페이지 로드 시 검색 입력란에 포커스
+        window.addEventListener('load', () => {
+            searchInput.focus();
+        });
+    </script>
+</body>
+</html> 

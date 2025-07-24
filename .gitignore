@@ -1,0 +1,48 @@
+# 환경변수 파일 (보안상 중요)
+.env
+.env.local
+.env.production
+
+# Python 관련
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE 관련
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 데이터베이스 파일
+*.db
+*.sqlite
+*.sqlite3
+
+# 로그 파일
+*.log
+logs/
+
+# 운영체제 관련
+.DS_Store
+Thumbs.db
+
+# 임시 파일
+*.tmp
+*.temp
+temp/
+
+# 차트 이미지 캐시
+static/charts/
+charts/
+
+# 테스트 파일
+test_*.py
+*_test.py 

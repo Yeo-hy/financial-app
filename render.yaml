@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: ai-financial-analysis
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    envVars:
+      - key: OPENDART_API_KEY
+        value: 353baf6666b17ba40389ce5967bd308e77bb579f
+      - key: GEMINI_API_KEY
+        value: AIzaSyALwAf-Jg2D9DsBalY_hQ2-Gm5svuhVN08
+      - key: FLASK_DEBUG
+        value: False
+      - key: FLASK_HOST
+        value: 0.0.0.0
+      - key: FLASK_PORT
+        value: 10000 
