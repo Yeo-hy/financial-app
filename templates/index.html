@@ -49,6 +49,41 @@
             font-size: 1.1em;
         }
 
+        .developer-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            opacity: 0.8;
+            backdrop-filter: blur(10px);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #6c757d;
+            margin-top: auto;
+        }
+
+        .footer p {
+            margin: 5px 0;
+            font-size: 0.9em;
+        }
+
+        .developer-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 500;
+        }
+
         .feature-highlights {
             display: flex;
             flex-wrap: wrap;
@@ -269,8 +304,11 @@
 <body>
     <div class="container">
         <div class="header">
-                    <h1>🚀 AI 재무분석 & 감사 리스크 분석 플랫폼</h1>
-        <p>회사명을 검색하여 종합적인 재무분석과 AI 기반 감사 리스크 분석을 받아보세요</p>
+            <div class="developer-info">
+                Developed by 여한영
+            </div>
+            <h1>🚀 AI 재무분석 & 감사 리스크 분석 플랫폼</h1>
+            <p>회사명을 검색하여 종합적인 재무분석과 AI 기반 감사 리스크 분석을 받아보세요</p>
         <div class="feature-highlights">
             <span class="feature-tag">📊 재무비율 분석</span>
             <span class="feature-tag">📈 시각화 차트</span>
@@ -414,5 +452,10 @@
             searchInput.focus();
         });
     </script>
+    
+    <div class="footer">
+        <p>© 2024 AI 재무분석 플랫폼 | <span class="developer-badge">Developed by 여한영</span></p>
+        <p>상장기업 재무정보 및 AI 기반 감사 리스크 분석 서비스</p>
+    </div>
 </body>
 </html> 

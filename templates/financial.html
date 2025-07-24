@@ -27,6 +27,18 @@
             overflow: hidden;
         }
 
+        .developer-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            opacity: 0.8;
+            backdrop-filter: blur(10px);
+        }
+
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -568,6 +580,9 @@
 <body>
     <div class="container">
         <div class="header">
+            <div class="developer-info">
+                Developed by 여한영
+            </div>
             <a href="/" class="back-btn">← 돌아가기</a>
             <h1>📈 {{ company.corp_name }}</h1>
             <p>재무정보 분석 및 시각화</p>
