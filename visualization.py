@@ -3,11 +3,49 @@ import matplotlib.font_manager as fm
 import numpy as np
 import io
 import base64
+import os
+import requests
 from typing import Dict, List, Tuple
 
-# 한글 폰트 설정
-plt.rcParams['font.family'] = ['Malgun Gothic', 'DejaVu Sans']
-plt.rcParams['axes.unicode_minus'] = False
+def setup_korean_font():
+    """한글 폰트를 설정합니다."""
+    try:
+        # Linux 환경에서 한글 폰트 다운로드 및 설정
+        font_path = '/tmp/NotoSansCJK.ttc'
+        
+        if not os.path.exists(font_path):
+            print("한글 폰트를 다운로드하는 중...")
+            font_url = 'https://github.com/googlefonts/noto-cjk/raw/main/Sans/OTC/NotoSansCJK-Regular.ttc'
+            
+            try:
+                response = requests.get(font_url, stream=True)
+                if response.status_code == 200:
+                    with open(font_path, 'wb') as f:
+                        for chunk in response.iter_content(chunk_size=8192):
+                            f.write(chunk)
+                    print("한글 폰트 다운로드 완료!")
+            except Exception as e:
+                print(f"폰트 다운로드 실패: {e}")
+                font_path = None
+        
+        # 폰트 설정
+        if font_path and os.path.exists(font_path):
+            font_prop = fm.FontProperties(fname=font_path)
+            plt.rcParams['font.family'] = font_prop.get_name()
+        else:
+            # 대체 폰트 설정
+            plt.rcParams['font.family'] = ['DejaVu Sans', 'Arial', 'sans-serif']
+            
+    except Exception as e:
+        print(f"폰트 설정 중 오류: {e}")
+        # 기본 폰트로 설정
+        plt.rcParams['font.family'] = ['DejaVu Sans', 'Arial', 'sans-serif']
+    
+    # 마이너스 기호 깨짐 방지
+    plt.rcParams['axes.unicode_minus'] = False
+
+# 한글 폰트 설정 실행
+setup_korean_font()
 
 class FinancialVisualizer:
     """재무데이터 시각화 클래스"""
