@@ -10,42 +10,85 @@ from typing import Dict, List, Tuple
 def setup_korean_font():
     """한글 폰트를 설정합니다."""
     try:
-        # Linux 환경에서 한글 폰트 다운로드 및 설정
-        font_path = '/tmp/NotoSansCJK.ttc'
+        # 간단한 방법: 폰트 캐시 재생성 및 설정
+        plt.rcParams['font.family'] = ['DejaVu Sans', 'Liberation Sans', 'Arial Unicode MS', 'sans-serif']
+        plt.rcParams['axes.unicode_minus'] = False
         
-        if not os.path.exists(font_path):
-            print("한글 폰트를 다운로드하는 중...")
-            font_url = 'https://github.com/googlefonts/noto-cjk/raw/main/Sans/OTC/NotoSansCJK-Regular.ttc'
+        # 폰트 캐시 재생성
+        try:
+            fm._get_fontconfig_fonts.cache_clear()
+            fm.fontManager.__init__()
+        except:
+            pass
             
-            try:
-                response = requests.get(font_url, stream=True)
-                if response.status_code == 200:
-                    with open(font_path, 'wb') as f:
-                        for chunk in response.iter_content(chunk_size=8192):
-                            f.write(chunk)
-                    print("한글 폰트 다운로드 완료!")
-            except Exception as e:
-                print(f"폰트 다운로드 실패: {e}")
-                font_path = None
+        # 시스템에서 사용 가능한 한글 폰트 찾기
+        korean_fonts = ['Noto Sans CJK KR', 'Noto Sans KR', 'NanumGothic', 'Malgun Gothic', 'UnDotum']
+        available_fonts = [f.name for f in fm.fontManager.ttflist]
         
-        # 폰트 설정
-        if font_path and os.path.exists(font_path):
-            font_prop = fm.FontProperties(fname=font_path)
-            plt.rcParams['font.family'] = font_prop.get_name()
+        for font in korean_fonts:
+            if font in available_fonts:
+                plt.rcParams['font.family'] = [font] + plt.rcParams['font.family']
+                print(f"한글 폰트 설정 완료: {font}")
+                break
         else:
-            # 대체 폰트 설정
-            plt.rcParams['font.family'] = ['DejaVu Sans', 'Arial', 'sans-serif']
-            
+            print("한글 폰트를 찾을 수 없어 기본 폰트를 사용합니다.")
+            # 유니코드 지원 폰트로 설정
+            plt.rcParams['font.family'] = ['DejaVu Sans', 'Liberation Sans', 'sans-serif']
+        
+        print(f"현재 폰트 설정: {plt.rcParams['font.family']}")
+        
     except Exception as e:
         print(f"폰트 설정 중 오류: {e}")
-        # 기본 폰트로 설정
-        plt.rcParams['font.family'] = ['DejaVu Sans', 'Arial', 'sans-serif']
-    
-    # 마이너스 기호 깨짐 방지
-    plt.rcParams['axes.unicode_minus'] = False
+        # 안전한 기본 설정
+        plt.rcParams['font.family'] = ['DejaVu Sans', 'sans-serif']
+        plt.rcParams['axes.unicode_minus'] = False
 
 # 한글 폰트 설정 실행
 setup_korean_font()
+
+def apply_korean_font(text_obj, fontsize=None):
+    """텍스트 객체에 한글 폰트를 적용합니다."""
+    try:
+        if fontsize:
+            text_obj.set_fontsize(fontsize)
+        # 폰트 속성 직접 설정
+        text_obj.set_fontfamily('DejaVu Sans')
+    except:
+        pass
+    return text_obj
+
+# 한글-영어 번역 사전 (차트 표시용)
+CHART_LABELS = {
+    '재무상태표 구성': 'Balance Sheet Composition',
+    '자산': 'Assets',
+    '부채와 자본': 'Liabilities & Equity', 
+    '유동자산': 'Current Assets',
+    '비유동자산': 'Non-current Assets',
+    '유동부채': 'Current Liabilities',
+    '비유동부채': 'Non-current Liabilities',
+    '자본총계': 'Total Equity',
+    '손익계산서 3개년 비교': 'Income Statement 3-Year Comparison',
+    '매출액': 'Revenue',
+    '영업이익': 'Operating Income',
+    '당기순이익': 'Net Income',
+    '재무비율 추이 분석': 'Financial Ratio Trend Analysis',
+    '유동비율': 'Current Ratio',
+    '부채비율': 'Debt Ratio',
+    '자기자본비율': 'Equity Ratio',
+    '영업이익률': 'Operating Margin',
+    '순이익률': 'Net Margin',
+    'ROA': 'ROA',
+    'ROE': 'ROE',
+    '년도': 'Year',
+    '비율': 'Ratio',
+    '금액 (조원)': 'Amount (Trillion KRW)',
+    '백분율 (%)': 'Percentage (%)',
+    '데이터가 없습니다': 'No Data Available'
+}
+
+def get_chart_label(korean_text):
+    """한글 텍스트를 영어 차트 라벨로 변환합니다."""
+    return CHART_LABELS.get(korean_text, korean_text)
 
 class FinancialVisualizer:
     """재무데이터 시각화 클래스"""
@@ -93,10 +136,10 @@ class FinancialVisualizer:
         
         # 차트 생성 - 박스형 적층 막대 차트
         fig, ax = plt.subplots(1, 1, figsize=(12, 8))
-        fig.suptitle('재무상태표 구성', fontsize=16, fontweight='bold')
+        fig.suptitle(get_chart_label('재무상태표 구성'), fontsize=16, fontweight='bold')
         
         # 데이터 준비
-        categories = ['자산', '부채와 자본']
+        categories = [get_chart_label('자산'), get_chart_label('부채와 자본')]
         
         # 자산 쌓기
         assets_current = assets_data['유동자산']
