@@ -46,3 +46,9 @@ charts/
 # 테스트 파일
 test_*.py
 *_test.py 
+
+# 폰트 파일
+fonts/
+*.ttf
+*.otf
+*.ttc 

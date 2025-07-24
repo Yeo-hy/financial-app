@@ -13,44 +13,85 @@ def setup_korean_font():
         # matplotlib 기본 설정
         plt.rcParams['axes.unicode_minus'] = False
         
-        # 시스템에서 사용 가능한 폰트 확인
-        available_fonts = [f.name for f in fm.fontManager.ttflist]
-        print(f"사용 가능한 폰트: {available_fonts[:10]}...")  # 처음 10개만 출력
-        
-        # 한글 폰트 우선순위
-        korean_fonts = [
-            'Noto Sans CJK KR',
-            'Noto Sans KR', 
-            'NanumGothic',
-            'NanumBarunGothic',
-            'Malgun Gothic',
-            'Apple SD Gothic Neo',
-            'UnDotum',
-            'Gulim',
-            'DejaVu Sans'
-        ]
-        
-        # 사용 가능한 한글 폰트 찾기
-        selected_font = None
-        for font in korean_fonts:
-            if font in available_fonts:
-                selected_font = font
-                print(f"한글 폰트 설정: {font}")
-                break
-        
-        if selected_font:
-            plt.rcParams['font.family'] = [selected_font]
+        # 한글 폰트 다운로드 및 설정
+        font_path = download_korean_font()
+        if font_path and os.path.exists(font_path):
+            # 다운로드된 폰트 등록
+            fm.fontManager.addfont(font_path)
+            font_prop = fm.FontProperties(fname=font_path)
+            plt.rcParams['font.family'] = [font_prop.get_name()]
+            print(f"한글 폰트 설정 완료: {font_prop.get_name()}")
         else:
-            print("한글 폰트를 찾을 수 없습니다. 기본 폰트를 사용합니다.")
-            # 한글 지원이 가능한 기본 폰트 설정
-            plt.rcParams['font.family'] = ['DejaVu Sans', 'Liberation Sans', 'sans-serif']
+            # 시스템 폰트 사용
+            setup_system_korean_font()
         
         print(f"최종 폰트 설정: {plt.rcParams['font.family']}")
         
     except Exception as e:
         print(f"폰트 설정 중 오류: {e}")
+        # 최후 수단: DejaVu Sans 사용
         plt.rcParams['font.family'] = ['DejaVu Sans', 'sans-serif']
         plt.rcParams['axes.unicode_minus'] = False
+
+def download_korean_font():
+    """Noto Sans CJK 폰트를 다운로드합니다."""
+    try:
+        font_dir = os.path.join(os.getcwd(), 'fonts')
+        if not os.path.exists(font_dir):
+            os.makedirs(font_dir)
+        
+        font_path = os.path.join(font_dir, 'NotoSansCJK-Regular.ttc')
+        
+        # 이미 다운로드된 경우 그대로 사용
+        if os.path.exists(font_path):
+            print("기존 한글 폰트 파일을 사용합니다.")
+            return font_path
+        
+        # Google Fonts에서 Noto Sans CJK 다운로드
+        font_url = 'https://github.com/googlefonts/noto-cjk/raw/main/Sans/OTF/Korean/NotoSansCJK-Regular.otf'
+        alt_font_path = os.path.join(font_dir, 'NotoSansCJK-Regular.otf')
+        
+        print("한글 폰트를 다운로드하는 중...")
+        urllib.request.urlretrieve(font_url, alt_font_path)
+        print("한글 폰트 다운로드 완료!")
+        return alt_font_path
+        
+    except Exception as e:
+        print(f"폰트 다운로드 실패: {e}")
+        return None
+
+def setup_system_korean_font():
+    """시스템에서 사용 가능한 한글 폰트를 설정합니다."""
+    # 시스템에서 사용 가능한 폰트 확인
+    available_fonts = [f.name for f in fm.fontManager.ttflist]
+    
+    # 한글 폰트 우선순위
+    korean_fonts = [
+        'Noto Sans CJK KR',
+        'Noto Sans KR', 
+        'NanumGothic',
+        'NanumBarunGothic',
+        'Malgun Gothic',
+        'Apple SD Gothic Neo',
+        'UnDotum',
+        'Gulim',
+        'Arial Unicode MS',
+        'DejaVu Sans'
+    ]
+    
+    # 사용 가능한 한글 폰트 찾기
+    selected_font = None
+    for font in korean_fonts:
+        if font in available_fonts:
+            selected_font = font
+            print(f"시스템 한글 폰트 설정: {font}")
+            break
+    
+    if selected_font:
+        plt.rcParams['font.family'] = [selected_font]
+    else:
+        print("한글 폰트를 찾을 수 없습니다. 기본 폰트를 사용합니다.")
+        plt.rcParams['font.family'] = ['DejaVu Sans', 'Liberation Sans', 'sans-serif']
 
 # 한글 폰트 설정 실행
 setup_korean_font()
